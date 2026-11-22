@@ -65,6 +65,55 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
         uri.host.isNotEmpty;
   }
 
+  void _resetForm() {
+    _formKey.currentState!.reset();
+    _startController.clear();
+    _endController.clear();
+    setState(() {
+      _title = "";
+      _description = "";
+      _thumbnail = "";
+      _startedAt = null;
+      _endedAt = null;
+    });
+  }
+
+  void _showSummary() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Experience berhasil ditambahkan!'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Title: ${_title.trim()}'),
+                Text('Deskripsi: ${_description.trim()}'),
+                Text(
+                  'Thumbnail: ${_thumbnail.trim().isEmpty ? "-" : _thumbnail.trim()}',
+                ),
+                Text('Mulai: ${_formatDate(_startedAt!)}'),
+                Text(
+                  'Selesai: ${_endedAt == null ? "Present" : _formatDate(_endedAt!)}',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.pop(context);
+                _resetForm();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -222,6 +271,28 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     }
                     return null;
                   },
+                ),
+              ),
+
+              // === Tombol Simpan ===
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(primary),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _showSummary();
+                      }
+                    },
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
             ],
