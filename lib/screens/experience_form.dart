@@ -10,10 +10,53 @@ class ExperienceFormPage extends StatefulWidget {
 
 class _ExperienceFormPageState extends State<ExperienceFormPage> {
   final _formKey = GlobalKey<FormState>();
+  final _startController = TextEditingController();
+  final _endController = TextEditingController();
 
   String _title = "";
   String _description = "";
   String _thumbnail = "";
+  DateTime? _startedAt;
+  DateTime? _endedAt;
+
+  static const List<String> _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  String _formatDate(DateTime date) =>
+      '${date.day} ${_months[date.month - 1]} ${date.year}';
+
+  @override
+  void dispose() {
+    _startController.dispose();
+    _endController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate({required bool isStart}) async {
+    final initial =
+        (isStart ? _startedAt : _endedAt) ?? _startedAt ?? DateTime.now();
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      if (isStart) {
+        _startedAt = picked;
+        _startController.text = _formatDate(picked);
+      } else {
+        _endedAt = picked;
+        _endController.text = _formatDate(picked);
+      }
+    });
+  }
 
   bool _isValidUrl(String value) {
     final uri = Uri.tryParse(value);
@@ -116,6 +159,66 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     if (text.isEmpty) return null; // opsional
                     if (!_isValidUrl(text)) {
                       return "URL harus diawali http:// atau https://";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              // === Start Date ===
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  controller: _startController,
+                  readOnly: true,
+                  onTap: () => _pickDate(isStart: true),
+                  decoration: InputDecoration(
+                    hintText: "Pilih tanggal mulai",
+                    labelText: "Start Date",
+                    suffixIcon: const Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  validator: (String? value) {
+                    if (_startedAt == null) {
+                      return "Tanggal mulai wajib diisi!";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              // === End Date (opsional) ===
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  controller: _endController,
+                  readOnly: true,
+                  onTap: () => _pickDate(isStart: false),
+                  decoration: InputDecoration(
+                    hintText: "Kosongkan jika masih berlangsung",
+                    labelText: "End Date (optional)",
+                    suffixIcon: _endedAt == null
+                        ? const Icon(Icons.calendar_today)
+                        : IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _endedAt = null;
+                                _endController.clear();
+                              });
+                            },
+                          ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  validator: (String? value) {
+                    if (_endedAt != null &&
+                        _startedAt != null &&
+                        _endedAt!.isBefore(_startedAt!)) {
+                      return "Tanggal selesai tidak boleh sebelum tanggal mulai!";
                     }
                     return null;
                   },
