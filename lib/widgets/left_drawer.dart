@@ -2,13 +2,20 @@ import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/interest_form.dart';
 import 'package:myportofolio_mobile/screens/interest_list_screen.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // watch: drawer dibangun ulang otomatis saat status login berubah.
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+
     return Drawer(
       child: ListView(
         children: [
@@ -46,11 +53,26 @@ class LeftDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: const Text('Add Interest'),
+            leading: const Icon(Icons.favorite_outline),
+            title: const Text('Interest List'),
             onTap: () {
               Navigator.pushReplacement(
                 context,
+                MaterialPageRoute(
+                  builder: (context) => const InterestListScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_circle_outline),
+            title: const Text('Add Interest'),
+            onTap: () async {
+              final navigator = Navigator.of(context);
+              final loggedIn = await ensureLoggedIn(context);
+              if (!loggedIn) return;
+
+              navigator.pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const InterestFormPage(),
                 ),
@@ -69,18 +91,34 @@ class LeftDrawer extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.favorite_outline),
-            title: const Text('Interest List'),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const InterestListScreen(),
-                ),
-              );
-            },
-          ),
+          const Divider(),
+          if (!isLoggedIn)
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Login'),
+              onTap: () {
+                final navigator = Navigator.of(context);
+                navigator.pop(); // tutup drawer
+                navigator.push(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () async {
+                final auth = context.read<AuthState>();
+                final messenger = ScaffoldMessenger.of(context);
+                Navigator.pop(context); // tutup drawer
+
+                await auth.logout();
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Kamu berhasil logout.')),
+                );
+              },
+            ),
         ],
       ),
     );

@@ -3,6 +3,9 @@ import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/interest_form.dart';
 import 'package:myportofolio_mobile/screens/interest_list_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 class ItemCard extends StatelessWidget {
   final ItemHomepage item;
@@ -15,9 +18,12 @@ class ItemCard extends StatelessWidget {
       color: item.color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
+          final messenger = ScaffoldMessenger.of(context);
+          final navigator = Navigator.of(context);
+
           // Memunculkan SnackBar ketika diklik
-          ScaffoldMessenger.of(context)
+          messenger
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
@@ -27,24 +33,42 @@ class ItemCard extends StatelessWidget {
 
           // Navigate ke halaman yang sesuai
           if (item.name == "Tambah Interest") {
-            Navigator.push(
-              context,
+            // Route guard: wajib login sebelum membuka form.
+            final loggedIn = await ensureLoggedIn(context);
+            if (!loggedIn) return;
+
+            navigator.push(
               MaterialPageRoute(builder: (context) => const InterestFormPage()),
             );
           } else if (item.name == "Tambah Experience") {
-            Navigator.push(
-              context,
+            navigator.push(
               MaterialPageRoute(
                 builder: (context) => const ExperienceFormPage(),
               ),
             );
           } else if (item.name == "Lihat Interest") {
-            Navigator.push(
-              context,
+            navigator.push(
               MaterialPageRoute(
                 builder: (context) => const InterestListScreen(),
               ),
             );
+          } else if (item.name == "Logout") {
+            final auth = context.read<AuthState>();
+
+            if (auth.isLoggedIn) {
+              await auth.logout();
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(content: Text('Kamu berhasil logout.')),
+                );
+            } else {
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(content: Text('Kamu belum login.')),
+                );
+            }
           }
         },
         child: Container(
