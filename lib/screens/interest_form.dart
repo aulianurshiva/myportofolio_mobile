@@ -76,10 +76,12 @@ class _InterestFormPageState extends State<InterestFormPage> {
                   ),
                   initialValue: _category,
                   items: _categories.entries
-                      .map((entry) => DropdownMenuItem(
-                            value: entry.key,
-                            child: Text(entry.value),
-                          ))
+                      .map(
+                        (entry) => DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ),
+                      )
                       .toList(),
                   onChanged: (String? newValue) {
                     setState(() {
@@ -124,7 +126,9 @@ class _InterestFormPageState extends State<InterestFormPage> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text('Interest berhasil ditambahkan!'),
+                              title: const Text(
+                                'Interest berhasil ditambahkan!',
+                              ),
                               content: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

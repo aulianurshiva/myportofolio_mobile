@@ -17,15 +17,11 @@ class MyApp extends StatelessWidget {
     // MultiProvider menyisipkan objek yang sering dipakai (API client,
     // state autentikasi) ke widget tree supaya bisa diakses dari mana saja.
     return MultiProvider(
-      providers: [
-        Provider.value(value: apiClient),
-      ],
+      providers: [Provider.value(value: apiClient)],
       child: MaterialApp(
         title: 'MyPortfolio',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF31582B),
-          ),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF31582B)),
           useMaterial3: true,
         ),
         home: MyHomePage(),

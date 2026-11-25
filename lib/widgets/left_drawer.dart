@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/interest_form.dart';
+import 'package:myportofolio_mobile/screens/interest_list_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 
 class LeftDrawer extends StatelessWidget {
@@ -64,6 +65,18 @@ class LeftDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ExperienceFormPage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite_outline),
+            title: const Text('Interest List'),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const InterestListScreen(),
                 ),
               );
             },
