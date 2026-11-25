@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:myportofolio_mobile/main.dart';
+import 'package:myportofolio_mobile/models/interest.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Interest.fromJson memetakan field snake_case dan default', () {
+    final interest = Interest.fromJson({
+      'id': 1,
+      'name': 'Gaming',
+      'category': 'fun',
+      'star_count': 3,
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(interest.id, 1);
+    expect(interest.name, 'Gaming');
+    expect(interest.description, '');
+    expect(interest.starCount, 3);
+    expect(interest.categoryLabel, 'For Fun');
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('Interest.toJson tidak mengirim id dan star_count', () {
+    const interest = Interest(
+      id: 1,
+      name: 'Gaming',
+      category: 'fun',
+      description: 'Main game',
+      starCount: 3,
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final json = interest.toJson();
+
+    expect(json.containsKey('id'), isFalse);
+    expect(json.containsKey('star_count'), isFalse);
+    expect(json['name'], 'Gaming');
+    expect(json['description'], 'Main game');
   });
 }
